@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dBytesStorage</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- the favicon for the webpage -->
+    <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/100/stack.png">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="blockchain.js" defer></script>
+    <script src="app.js"></script>
+</head>
+
+<body>
+    <div class="background-video">
+        <video id="myVideo" autoplay muted loop>
+            <source src="../../media/ai.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- text on the video -->
+    <div id="video-message">
+        <p id="message-one" class="video-message">Unlock the Future of File Storage</p>
+        <p id="message-two" class="video-message">Join a Secure, Affordable, and Collaborative Decentralized Network
+        </p>
+    </div>
+
+    <div class="arrow bounce">
+    </div>
+
+    <div class="content-wrapper">
+        <nav>
+            <ul>
+                <li>
+                    <!-- logo image acts as a link to the homepage. -->
+                    <a href="index.html">
+                        <img src="https://img.icons8.com/ios-filled/100/stack.png" alt="Logo" style="height: 50px;">
+                    </a>
+                </li>
+                <li><a href="index.html">home</a></li>
+                <li><a href="consumer.html">store a file</a></li>
+                <li><a href="provider.html">register as provider</a></li>
+                <li><a href="how-it-works.html">how it works</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </nav>
+        <main>
+            <div class="container-center">
+                <section>
+                    <h2 class="feature-black">WELCOME TO dBytesStorage</h2>
+                </section>
+
+                <div class="feature-section">
+                    <section>
+                        <div class="feature-card" data-aos="fade-up">
+                            <video id="video-on-index" autoplay loop muted playsinline>
+                                <source src="../../media/storage_intro.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="feature-text">
+                                <h3 class="feature-title">Decentralized Storage Solutions</h3>
+                                <p class="feature-description">Unlock the potential of your unused storage space and
+                                    share securely.</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                            <video id="video-on-index" autoplay loop muted playsinline>
+                                <source src="../../media/security.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="feature-text">
+                                <h3 class="feature-title">Secure and Efficient</h3>
+                                <p class="feature-description">Benefit from enhanced security and efficiency through
+                                    blockchain technology.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <section>
+                    <h2 class="feature-title-black">About Our Project</h2>
+                    <p class="feature-description-black">dBytesStorage is a revolutionary decentralized platform that
+                        enables users to rent and share their unused storage space securely and affordably. Our mission
+                        is to provide an efficient, transparent, and censorship-resistant storage solution that empowers
+                        individuals to control their data.</p>
+                </section>
+
+                <section>
+                    <h2 class="feature-title-black">Ready to Join the Storage Revolution?</h2>
+                    <a href="register.html" class="cta-button">Get Started Today</a>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
