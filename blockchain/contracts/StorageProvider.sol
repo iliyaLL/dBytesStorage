@@ -1,50 +1,23 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.26;
+
+import "./Storage.sol";
+import "./StorageToken.sol";
 
 contract StorageProvider {
-    struct Provider {
-        address providerAddress;
-        uint256 availableSpace;
-        uint256 pricePerMB;
-        uint256 registeredAt;
+    Storage public storageContract;
+
+    constructor(Storage _storageContract) {
+        storageContract = _storageContract;
     }
 
-    mapping(address => Provider) public providers;
-    address[] public providerList;
-
-    // Event to log provider registration
-    event ProviderRegistered(
-        address indexed providerAddress,
-        uint256 availableSpace,
-        uint256 pricePerMB
-    );
-
-    function registerProvider(
-        uint256 _availableSpace,
-        uint256 _pricePerMB
-    ) external {
-        require(_availableSpace > 0, "Available space must be greater than 0");
-        require(_pricePerMB > 0, "Price per MB must be greater than 0");
-
-        providers[msg.sender] = Provider({
-            providerAddress: msg.sender,
-            availableSpace: _availableSpace,
-            pricePerMB: _pricePerMB,
-            registeredAt: block.timestamp
-        });
-
-        providerList.push(msg.sender);
-
-        emit ProviderRegistered(msg.sender, _availableSpace, _pricePerMB);
+    // Function for the provider to register their storage
+    function registerStorage(uint256 size, uint256 rate) external {
+        storageContract.registerStorage(size, rate);
     }
 
-    function getProvider(
-        address _providerAddress
-    ) external view returns (Provider memory) {
-        return providers[_providerAddress];
-    }
-
-    function getProviderList() external view returns (address[] memory) {
-        return providerList;
+    // Function to get storage details
+    function getMyStorageDetails() external view returns (Storage.StorageUnit memory) {
+        return storageContract.getStorageDetails(msg.sender);
     }
 }

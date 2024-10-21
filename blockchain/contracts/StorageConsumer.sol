@@ -1,51 +1,33 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.26;
 
-import "./StorageProvider.sol";
+import "./Storage.sol";
 import "./StorageToken.sol";
 
 contract StorageConsumer {
-    StorageProvider storageProvider;
-    StorageToken storageToken;
+    Storage public storageContract;
 
-    struct File {
-        address consumerAddress;
-        uint256 fileSize;
-        uint256 paidAmount;
-        uint256 storedAt;
-        bool isStored;
+    constructor(Storage _storageContract) {
+        storageContract = _storageContract;
     }
 
-    mapping(address => File[]) public storedFiles;
-
-    event FileStored(address indexed consumer, uint256 fileSize, uint256 paidAmount, address provider);
-
-    constructor(address _storageProvider, address _storageToken) {
-        storageProvider = StorageProvider(_storageProvider);
-        storageToken = StorageToken(_storageToken);
+    // Function to rent storage from a provider
+    function rentStorage(address provider) external {
+        storageContract.rentStorage(provider);
     }
 
-    function storeFile(address _provider, uint256 _fileSize) external {
-        StorageProvider.Provider memory provider = storageProvider.getProvider(_provider);
-        require(provider.availableSpace >= _fileSize, "Not enough available space");
-
-        uint256 totalCost = provider.pricePerMB * _fileSize;
-        require(storageToken.balanceOf(msg.sender) >= totalCost, "Insufficient tokens");
-
-        storageToken.transferFrom(msg.sender, _provider, totalCost);
-
-        storedFiles[msg.sender].push(File({
-            consumerAddress: msg.sender,
-            fileSize: _fileSize,
-            paidAmount: totalCost,
-            storedAt: block.timestamp,
-            isStored: true
-        }));
-
-        emit FileStored(msg.sender, _fileSize, totalCost, _provider);
+    // Function to get the storage details of a specific provider
+    function getProviderStorageDetails(
+        address provider
+    ) external view returns (Storage.StorageUnit memory) {
+        return storageContract.getStorageDetails(provider);
     }
 
-    function getStoredFiles(address _consumer) external view returns (File[] memory) {
-        return storedFiles[_consumer];
+    // Function to check balance of StorageToken
+    function getTokenBalance() external view returns (uint256) {
+        StorageToken token = StorageToken(
+            address(storageContract.storageToken())
+        );
+        return token.balanceOf(msg.sender);
     }
 }
