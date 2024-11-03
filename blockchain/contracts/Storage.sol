@@ -4,70 +4,103 @@ pragma solidity ^0.8.26;
 import "./StorageToken.sol";
 
 contract Storage {
-    StorageToken public storageToken;
-    address public owner;
-
-    struct StorageUnit {
-        uint256 size; // Size of the storage in GB
-        uint256 rate; // Rate per GB for the consumer
+    struct StorageInfo {
         address owner;
         address consumer;
+        uint256 gb;
+        uint256 rate;
+        string socket;
+        bool isAvailable;
     }
 
-    mapping(address => StorageUnit) public storageUnits; // Mapping to track storage units for providers
+    StorageToken public storageToken;
+    mapping(uint256 => StorageInfo) public storages;
+    uint256 public storageCount;
 
     event StorageRegistered(
-        address indexed provider,
-        uint256 size,
-        uint256 rate
+        uint256 indexed storageId,
+        address indexed owner,
+        uint256 gb,
+        uint256 rate,
+        string socket
     );
     event StorageRented(
+        uint256 indexed storageId,
         address indexed consumer,
-        address indexed provider,
-        uint256 amount
+        uint256 gb
     );
 
     constructor(StorageToken _storageToken) {
         storageToken = _storageToken;
-        owner = msg.sender;
     }
 
-    // Function for the provider to register their available storage
-    function registerStorage(uint256 size, uint256 rate) external {
-        require(size > 0, "Size must be greater than zero");
-        require(rate > 0, "Rate must be greater than zero");
+    function registerStorage(
+        uint256 _gb,
+        uint256 _rate,
+        string memory _socket
+    ) public {
+        storageCount++;
+        storages[storageCount] = StorageInfo({
+            owner: msg.sender,
+            consumer: address(0),
+            gb: _gb,
+            rate: _rate,
+            socket: _socket,
+            isAvailable: true
+        });
 
-        storageUnits[msg.sender] = StorageUnit(
-            size,
-            rate,
-            msg.sender,
-            address(0)
-        );
-        emit StorageRegistered(msg.sender, size, rate);
+        emit StorageRegistered(storageCount, msg.sender, _gb, _rate, _socket);
     }
 
-    // Function to rent storage from the provider
-    function rentStorage(address provider) external {
-        StorageUnit storage unit = storageUnits[provider];
+    function rentStorage(uint256 _storageId, uint256 _gb) public {
+        StorageInfo storage storageInfo = storages[_storageId];
 
-        require(unit.consumer == address(0), "Storage is already rented");
+        require(storageInfo.isAvailable, "Storage is not available");
+        require(storageInfo.gb >= _gb, "Insufficient storage available");
 
-        uint256 totalCost = unit.rate;
+        uint256 paymentAmount = _gb * storageInfo.rate;
         require(
-            storageToken.balanceOf(msg.sender) >= totalCost,
-            "Insufficient funds"
+            storageToken.transferFrom(
+                msg.sender,
+                storageInfo.owner,
+                paymentAmount
+            ),
+            "Payment failed"
         );
 
-        storageToken.transferFrom(msg.sender, provider, totalCost);
-        unit.consumer = msg.sender;
+        storageInfo.consumer = msg.sender;
+        storageInfo.gb -= _gb;
 
-        emit StorageRented(msg.sender, provider, totalCost);
+        if (storageInfo.gb == 0) {
+            storageInfo.isAvailable = false;
+        }
+
+        emit StorageRented(_storageId, msg.sender, _gb);
     }
 
-    // Function to get storage details for a provider
-    function getStorageDetails(
-        address provider
-    ) external view returns (StorageUnit memory) {
-        return storageUnits[provider];
+    function releaseStorage(uint256 _storageId) public {
+        StorageInfo storage storageInfo = storages[_storageId];
+
+        require(
+            msg.sender == storageInfo.consumer,
+            "Only the consumer can release storage"
+        );
+
+        storageInfo.consumer = address(0);
+        storageInfo.isAvailable = true;
+    }
+
+    function getAllStorages() public view returns (StorageInfo[] memory) {
+        StorageInfo[] memory availableStorages = new StorageInfo[](
+            storageCount
+        );
+        uint256 counter = 0;
+
+        for (uint256 i = 1; i <= storageCount; i++) {
+            availableStorages[counter] = storages[i];
+            counter++;
+        }
+
+        return availableStorages;
     }
 }
