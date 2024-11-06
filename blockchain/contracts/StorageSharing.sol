@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import "./StorageToken.sol";
-
-contract Storage {
+contract StorageSharing {
     struct StorageInfo {
         address owner;
         address consumer;
@@ -13,7 +11,6 @@ contract Storage {
         bool isAvailable;
     }
 
-    StorageToken public storageToken;
     mapping(uint256 => StorageInfo) public storages;
     uint256 public storageCount;
 
@@ -29,10 +26,6 @@ contract Storage {
         address indexed consumer,
         uint256 gb
     );
-
-    constructor(StorageToken _storageToken) {
-        storageToken = _storageToken;
-    }
 
     function registerStorage(
         uint256 _gb,
@@ -52,30 +45,25 @@ contract Storage {
         emit StorageRegistered(storageCount, msg.sender, _gb, _rate, _socket);
     }
 
-    function rentStorage(uint256 _storageId, uint256 _gb) public {
+    function rentStorage(uint256 _storageId) public payable {
         StorageInfo storage storageInfo = storages[_storageId];
 
         require(storageInfo.isAvailable, "Storage is not available");
-        require(storageInfo.gb >= _gb, "Insufficient storage available");
 
-        uint256 paymentAmount = _gb * storageInfo.rate;
-        require(
-            storageToken.transferFrom(
-                msg.sender,
-                storageInfo.owner,
-                paymentAmount
-            ),
-            "Payment failed"
-        );
+        uint256 paymentAmount = storageInfo.gb * storageInfo.rate;
+        require(msg.value >= paymentAmount, "Insufficient Ether sent");
+
+        payable(storageInfo.owner).transfer(paymentAmount);
 
         storageInfo.consumer = msg.sender;
-        storageInfo.gb -= _gb;
 
-        if (storageInfo.gb == 0) {
-            storageInfo.isAvailable = false;
+        storageInfo.isAvailable = false;
+
+        emit StorageRented(_storageId, msg.sender, storageInfo.gb);
+
+        if (msg.value > paymentAmount) {
+            payable(msg.sender).transfer(msg.value - paymentAmount);
         }
-
-        emit StorageRented(_storageId, msg.sender, _gb);
     }
 
     function releaseStorage(uint256 _storageId) public {
