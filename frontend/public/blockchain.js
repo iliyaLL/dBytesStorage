@@ -265,13 +265,14 @@ async function listAllStorages() {
 
 		for (let i = 1; i <= storageCount; i++) {
 			const storageInfo = await storageSharing.methods.storages(i).call();
-			const { owner, gb, rate, isAvailable } = storageInfo;
+			const { owner, consumer, gb, rate, isAvailable, } = storageInfo;
 			const paymentAmount = gb * rate;
 
 			const row = document.createElement('tr');
 			row.innerHTML = `
                 <td>${i}</td>
                 <td>${owner}</td>
+				<td>${consumer}</td>
                 <td>${gb} MB</td>
                 <td>${rate} wei</td>
                 <td>${isAvailable ? 'Available' : 'Rented'}</td>
