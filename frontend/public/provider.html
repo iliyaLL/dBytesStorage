@@ -48,6 +48,9 @@
                     <label for="pricePerMB">Price per MB (in wei):</label>
                     <input type="number" id="pricePerMB" required>
 
+                    <label for="socket">Socket (identifier or location):</label>
+                    <input type="text" id="socket" required>
+
                     <button type="submit" class="cta-button">Register</button>
                 </form>
                 <p id="providerMessage"></p>
@@ -56,6 +59,37 @@
     </div>
 
     <script src="blockchain.js" defer></script>
+    <script>
+        document.getElementById('providerForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            // Get form values
+            const availableSpace = document.getElementById('availableSpace').value;
+            const pricePerMB = document.getElementById('pricePerMB').value;
+            const socket = document.getElementById('socket').value;  // Get the socket value
+
+            try {
+                // Register the provider in the blockchain
+                await storageSharing.methods.registerStorage(availableSpace, pricePerMB, socket).send({
+                    from: ethereum.selectedAddress
+                });
+
+                document.getElementById('providerMessage').innerText = 'Registration successful. Starting download...';
+
+                // Trigger download of the binary .exe file
+                const downloadLink = document.createElement('a');
+                downloadLink.href = '/files/test.txt';
+                downloadLink.download = 'test.txt';    // Ensure the filename is correct
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+
+            } catch (error) {
+                console.error('Error registering provider:', error);
+                document.getElementById('providerMessage').innerText = 'Error during registration. Please try again.';
+            }
+        });
+    </script>
 </body>
 
 </html>
