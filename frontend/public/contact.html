@@ -34,32 +34,28 @@
                 </li>
                 <li><a href="index.html">home</a></li>
                 <li><a href="consumer.html">store a file</a></li>
-                <li><a href="provider.html">register as provider</a></li>
+                <li><a href="provider.html">share storage</a></li>
+                <li><a href="list.html">the list of storage</a></li>
                 <li><a href="how-it-works.html">how it works</a></li>
                 <li><a href="contact.html">contact</a></li>
             </ul>
         </nav>
         <main>
             <div class="container-center">
-                <form id="contactForm" action="/submit" method="POST">
+                <form id="contactForm" action="https://formspree.io/f/xrbgqqba" method="POST">
                     <h2>Contact Us</h2>
 
                     <div>
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-
-                    <div>
-                        <label for="email">Email:</label>
+                        <label for="email">Your email:</label>
                         <input type="email" id="email" name="email" required>
                     </div>
 
                     <div>
-                        <label for="message">Message:</label>
+                        <label for="message">Your message:</label>
                         <textarea id="message" name="message" rows="4" required></textarea>
                     </div>
 
-                    <a href="register.html" class="cta-button">Send</a>
+                    <button class="cta-button" type="submit">Send</button>
                 </form>
             </div>
         </main>
