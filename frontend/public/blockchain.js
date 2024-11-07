@@ -265,7 +265,8 @@ async function listAllStorages() {
 
 		for (let i = 1; i <= storageCount; i++) {
 			const storageInfo = await storageSharing.methods.storages(i).call();
-			const { owner, gb, rate, socket, isAvailable } = storageInfo;
+			const { owner, gb, rate, isAvailable } = storageInfo;
+			const paymentAmount = gb * rate;
 
 			const row = document.createElement('tr');
 			row.innerHTML = `
@@ -275,7 +276,7 @@ async function listAllStorages() {
                 <td>${rate} wei</td>
                 <td>${isAvailable ? 'Available' : 'Rented'}</td>
 				<td>
-					<button class="rent-button" ${isAvailable ? '' : 'disabled'} onclick="rentStorage(${i}, ${gb * rate})">
+					<button class="rent-button" ${isAvailable ? '' : 'disabled'} onclick="rentStorage(${i}, ${paymentAmount})">
 						Rent
 					</button>
 				</td>
@@ -289,15 +290,13 @@ async function listAllStorages() {
 
 async function rentStorage(storageId, paymentAmount) {
 	try {
-		const accounts = await web3.eth.getAccounts();
-		const userAccount = accounts[0];
-
-		await storageSharing.methods.rentStorage(storageId).send({ from: userAccount, value: paymentAmount });
-
-		alert(`Storage ${storageId} rented successfully!`);
-		await listAllStorages();
+		await storageSharing.methods.rentStorage(storageId).send({
+			from: ethereum.selectedAddress,
+			value: paymentAmount // Ensure this passes the correct ether amount
+		});
+		alert('Storage rented successfully!');
+		listAllStorages(); // Refresh the listing after renting
 	} catch (error) {
 		console.error('Error renting storage:', error);
-		alert(`Failed to rent storage: ${error.message}`);
 	}
 }
