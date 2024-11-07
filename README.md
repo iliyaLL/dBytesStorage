@@ -92,4 +92,14 @@ Motivation:
 Connet all devices to one LAN (Personal Hotspot)
 npx hardhat node --hostname {ip}
 Add new Network Metamask
+configure hardhat.config.js
+module.exports = {
+  solidity: "0.8.27",
+  networks: {
+    localhost: {
+      url: "http://{ipv4}:{PORT}",
+    },
+  },
+};
+npx hardhat run scripts/deploy.js --network localhost
 ```

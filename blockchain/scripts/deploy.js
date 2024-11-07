@@ -11,7 +11,7 @@ async function main() {
     const deploymentInfo = {
         storageSharing: {
             address: storageAddress,
-            abi: JSON.parse(fs.readFileSync(path.resolve(__dirname, "./../artifacts/contracts/Storage.sol/Storage.json"), "utf8")).abi,
+            abi: JSON.parse(fs.readFileSync(path.resolve(__dirname, "./../artifacts/contracts/StorageSharing.sol/StorageSharing.json"), "utf8")).abi,
         },
     };
     const pathToFile = path.join(__dirname, 'deployment-info.json');

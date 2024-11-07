@@ -1,51 +1,131 @@
-// app.js
-
-// Replace with your contract addresses
-const storageProviderAddress = '0xf2b6ed3cc198c16f4681869678082537967951ed';
-const storageTokenAddress = '0x0ddaf8bb9a088f2dd13d25cf181db8cafebd717a';
-const storageConsumerAddress = '0xYourStorageConsumerAddress';
-
-// Import the ABI from the compiled contracts
-const StorageProviderABI = [
+const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const contractABI = [
 	{
 		"anonymous": false,
 		"inputs": [
 			{
 				"indexed": true,
+				"internalType": "uint256",
+				"name": "storageId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
 				"internalType": "address",
-				"name": "providerAddress",
+				"name": "owner",
 				"type": "address"
 			},
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "availableSpace",
+				"name": "gb",
 				"type": "uint256"
 			},
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "pricePerMB",
+				"name": "rate",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "socket",
+				"type": "string"
+			}
+		],
+		"name": "StorageRegistered",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "storageId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "consumer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "gb",
 				"type": "uint256"
 			}
 		],
-		"name": "ProviderRegistered",
+		"name": "StorageRented",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "getAllStorages",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "consumer",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "gb",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rate",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "socket",
+						"type": "string"
+					},
+					{
+						"internalType": "bool",
+						"name": "isAvailable",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct StorageSharing.StorageInfo[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "_availableSpace",
+				"name": "_gb",
 				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "_pricePerMB",
+				"name": "_rate",
 				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_socket",
+				"type": "string"
 			}
 		],
-		"name": "registerProvider",
+		"name": "registerStorage",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -53,52 +133,37 @@ const StorageProviderABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "_providerAddress",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "_storageId",
+				"type": "uint256"
 			}
 		],
-		"name": "getProvider",
-		"outputs": [
+		"name": "releaseStorage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
 			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "providerAddress",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "availableSpace",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "pricePerMB",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "registeredAt",
-						"type": "uint256"
-					}
-				],
-				"internalType": "struct StorageProvider.Provider",
-				"name": "",
-				"type": "tuple"
+				"internalType": "uint256",
+				"name": "_storageId",
+				"type": "uint256"
 			}
 		],
-		"stateMutability": "view",
+		"name": "rentStorage",
+		"outputs": [],
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
 		"inputs": [],
-		"name": "getProviderList",
+		"name": "storageCount",
 		"outputs": [
 			{
-				"internalType": "address[]",
+				"internalType": "uint256",
 				"name": "",
-				"type": "address[]"
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -112,273 +177,8 @@ const StorageProviderABI = [
 				"type": "uint256"
 			}
 		],
-		"name": "providerList",
+		"name": "storages",
 		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "providers",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "providerAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "availableSpace",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "pricePerMB",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "registeredAt",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	}
-];
-const StorageTokenABI = [
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "spender",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "approve",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "spender",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "allowance",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "needed",
-				"type": "uint256"
-			}
-		],
-		"name": "ERC20InsufficientAllowance",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "sender",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "balance",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "needed",
-				"type": "uint256"
-			}
-		],
-		"name": "ERC20InsufficientBalance",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "approver",
-				"type": "address"
-			}
-		],
-		"name": "ERC20InvalidApprover",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "receiver",
-				"type": "address"
-			}
-		],
-		"name": "ERC20InvalidReceiver",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "sender",
-				"type": "address"
-			}
-		],
-		"name": "ERC20InvalidSender",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "spender",
-				"type": "address"
-			}
-		],
-		"name": "ERC20InvalidSpender",
-		"type": "error"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "spender",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "Approval",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "transfer",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "Transfer",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "transferFrom",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
 			{
 				"internalType": "address",
 				"name": "owner",
@@ -386,139 +186,118 @@ const StorageTokenABI = [
 			},
 			{
 				"internalType": "address",
-				"name": "spender",
+				"name": "consumer",
 				"type": "address"
-			}
-		],
-		"name": "allowance",
-		"outputs": [
+			},
 			{
 				"internalType": "uint256",
-				"name": "",
+				"name": "gb",
 				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "balanceOf",
-		"outputs": [
+			},
 			{
 				"internalType": "uint256",
-				"name": "",
+				"name": "rate",
 				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "decimals",
-		"outputs": [
-			{
-				"internalType": "uint8",
-				"name": "",
-				"type": "uint8"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "name",
-		"outputs": [
+			},
 			{
 				"internalType": "string",
-				"name": "",
+				"name": "socket",
 				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "symbol",
-		"outputs": [
+			},
 			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "totalSupply",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
+				"internalType": "bool",
+				"name": "isAvailable",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
 		"type": "function"
 	}
-];
-const StorageConsumerABI = [ /* ABI for StorageConsumer */ ];
+]
 
 let web3;
 let accounts;
-let storageProvider;
-let storageToken;
-let storageConsumer;
+let storageSharing;
 
 window.addEventListener('load', async () => {
-    if (window.ethereum) {
-        web3 = new Web3(window.ethereum);
-        await window.ethereum.enable();
-        accounts = await web3.eth.getAccounts();
+	if (window.ethereum) {
+		web3 = new Web3(window.ethereum);
+		await window.ethereum.enable();
+		accounts = await web3.eth.getAccounts();
 
-        storageProvider = new web3.eth.Contract(StorageProviderABI, storageProviderAddress);
-        storageToken = new web3.eth.Contract(StorageTokenABI, storageTokenAddress);
-        storageConsumer = new web3.eth.Contract(StorageConsumerABI, storageConsumerAddress);
-    } else {
-        alert('Please install MetaMask to use this app');
-    }
+		storageSharing = new web3.eth.Contract(contractABI, contractAddress);
+
+		await listAllStorages();
+	} else {
+		alert('Please install MetaMask to use this app');
+	}
 });
 
 // Register a provider
-document.getElementById('providerForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const availableSpace = document.getElementById('availableSpace').value;
-    const pricePerMB = document.getElementById('pricePerMB').value;
+document.getElementById("providerForm").addEventListener("submit", async (event) => {
+	event.preventDefault();
 
-    try {
-        await storageProvider.methods.registerProvider(availableSpace, pricePerMB).send({ from: accounts[0] });
-        document.getElementById('providerMessage').innerText = 'Provider registered successfully!';
-    } catch (error) {
-        document.getElementById('providerMessage').innerText = 'Error registering provider: ' + error.message;
-    }
+	const availableSpace = document.getElementById("availableSpace").value;
+	const pricePerMB = document.getElementById("pricePerMB").value;
+	console.log(availableSpace, pricePerMB);
+
+	const socket = "socketAddressOrIdentifier";
+
+	try {
+		await storageSharing.methods.registerStorage(
+			availableSpace,
+			pricePerMB,
+			socket
+		).send({ from: accounts[0] });
+
+		document.getElementById("providerMessage").textContent = "Storage successfully registered!";
+	} catch (error) {
+		console.error("Error registering storage:", error);
+		document.getElementById("providerMessage").textContent = "Failed to register storage. Please try again.";
+	}
 });
 
-// Store a file
-document.getElementById('consumerForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const providerAddress = document.getElementById('providerAddress').value;
-    const fileSize = document.getElementById('fileSize').value;
+async function listAllStorages() {
+	try {
+		const storageCount = await storageSharing.methods.storageCount().call();
+		const storageListing = document.getElementById('storageListing');
+		storageListing.innerHTML = '';
 
-    try {
-        await storageConsumer.methods.storeFile(providerAddress, fileSize).send({ from: accounts[0] });
-        document.getElementById('consumerMessage').innerText = 'File stored successfully!';
-    } catch (error) {
-        document.getElementById('consumerMessage').innerText = 'Error storing file: ' + error.message;
-    }
-});
+		for (let i = 1; i <= storageCount; i++) {
+			const storageInfo = await storageSharing.methods.storages(i).call();
+			const { owner, gb, rate, socket, isAvailable } = storageInfo;
+
+			const row = document.createElement('tr');
+			row.innerHTML = `
+                <td>${i}</td>
+                <td>${owner}</td>
+                <td>${gb} MB</td>
+                <td>${rate} wei</td>
+                <td>${isAvailable ? 'Available' : 'Rented'}</td>
+				<td>
+					<button class="rent-button" ${isAvailable ? '' : 'disabled'} onclick="rentStorage(${i}, ${gb * rate})">
+						Rent
+					</button>
+				</td>
+            `;
+			storageListing.appendChild(row);
+		}
+	} catch (error) {
+		console.error('Error fetching storages:', error);
+	}
+}
+
+async function rentStorage(storageId, paymentAmount) {
+	try {
+		const accounts = await web3.eth.getAccounts();
+		const userAccount = accounts[0];
+
+		await storageSharing.methods.rentStorage(storageId).send({ from: userAccount, value: paymentAmount });
+
+		alert(`Storage ${storageId} rented successfully!`);
+		await listAllStorages();
+	} catch (error) {
+		console.error('Error renting storage:', error);
+		alert(`Failed to rent storage: ${error.message}`);
+	}
+}

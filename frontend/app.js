@@ -19,6 +19,10 @@ app.get('/how-it-works.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'how-it-works.html'));
 });
 
+app.get('/provider.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'publci', 'provider.html'))
+})
+
 app.get('/contact.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'contact.html'));
 });
