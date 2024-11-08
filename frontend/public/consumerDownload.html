@@ -42,68 +42,78 @@
         </nav>
         <main>
             <div class="container-center">
-                <h2>Store File</h2>
-                <form id="consumerForm">
-                    <label for="storageID">Storage ID:</label>
-                    <input type="number" id="storageID" required>
+                <h2>Download File</h2>
+                <form id="consumerDownloadForm">
+                    <label for="storageIDdownload">StorageID:</label>
+                    <input type="number" id="storageIDdownload" required>
 
-                    <label for="fileInput">File:</label>
-                    <input type="file" id="fileInput" required>
-
-                    <button type="submit" class="cta-button">Store File</button>
+                    <label for="fileName">File Name:</label>
+                    <input type="text" , id="fileName" placeholder="helloworld.cpp" required>
+                    <button type="submit" class="cta-button">Download File</button>
                 </form>
-                <p id="consumerMessage"></p>
+                <p id="downloadMessage"></p>
             </div>
         </main>
     </div>
     <script src="blockchain.js" defer></script>
     <script>
-        document.getElementById("consumerForm").addEventListener("submit", async (event) => {
+        document.getElementById("consumerDownloadForm").addEventListener("submit", async (event) => {
             event.preventDefault();
 
-            const storageID = document.getElementById("storageID").value;
-            const fileInput = document.getElementById("fileInput").files[0];
+            const storageID = document.getElementById("storageIDdownload").value;
+            const fileName = document.getElementById("fileName").value;
 
             try {
                 const storageInfo = await storageSharing.methods.storages(storageID).call();
-                const { owner, consumer, socket, isAvailable, } = storageInfo;
+                const { owner, consumer, socket, isAvailable } = storageInfo;
 
                 const userAccount = web3.utils.toChecksumAddress(accounts[0]);
                 const storageConsumer = web3.utils.toChecksumAddress(consumer);
 
                 if (storageConsumer !== userAccount) {
-                    document.getElementById("consumerMessage").textContent = "Permission denied. You are not the consumer of this storage.";
+                    document.getElementById("downloadMessage").textContent = "Permission denied. You are not the consumer of this storage.";
                     return;
                 }
 
                 const socketUrl = `http://${socket}`;
-                console.log(socketUrl);
-                const sock = io(socket);
+                console.log("Connecting to provider's socket server at:", socketUrl);
+
+                const sock = io(socketUrl);
 
                 sock.on('connect', () => {
                     console.log('Connected to provider server');
 
-                    // Read the file and send it to the provider server
-                    const reader = new FileReader();
-                    reader.onload = function (event) {
-                        const fileData = event.target.result;
-                        sock.emit('upload-file', fileInput.name, fileData);
-                    };
-                    reader.readAsArrayBuffer(fileInput); // Read file as binary data
+                    sock.emit('download-file', fileName);
 
-                    // Receive upload status from provider server
-                    sock.on('upload-status', (statusMessage) => {
-                        document.getElementById("consumerMessage").textContent = statusMessage;
-                        sock.disconnect(); // Disconnect after receiving status
+                    sock.on('file-data', (data) => {
+                        const { fileName, data: fileData } = data;
+                        console.log(`Received file: ${fileName}`);
+
+                        const blob = new Blob([fileData], { type: 'application/octet-stream' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = fileName;
+                        a.click();
+
+                        URL.revokeObjectURL(url);
+
+                        sock.disconnect();
+                        document.getElementById("downloadMessage").textContent = "File downloaded successfully.";
+                    });
+
+                    sock.on('download-status', (statusMessage) => {
+                        document.getElementById("downloadMessage").textContent = statusMessage;
                     });
                 });
 
                 sock.on('connect_error', () => {
-                    document.getElementById("consumerMessage").textContent = "Failed to connect to provider server.";
+                    document.getElementById("downloadMessage").textContent = "Failed to connect to provider server.";
                 });
+
             } catch (error) {
                 console.error("Error checking storage info:", error);
-                document.getElementById("consumerMessage").textContent = "Failed to check storage. Please try again.";
+                document.getElementById("downloadMessage").textContent = "Failed to check storage. Please try again.";
             }
         });
     </script>

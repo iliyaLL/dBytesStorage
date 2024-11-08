@@ -239,9 +239,7 @@ document.getElementById("providerForm").addEventListener("submit", async (event)
 
 	const availableSpace = document.getElementById("availableSpace").value;
 	const pricePerMB = document.getElementById("pricePerMB").value;
-	console.log(availableSpace, pricePerMB);
-
-	const socket = "socketAddressOrIdentifier";
+	const socket = document.getElementById("socket").value;
 
 	try {
 		await storageSharing.methods.registerStorage(
@@ -251,6 +249,13 @@ document.getElementById("providerForm").addEventListener("submit", async (event)
 		).send({ from: accounts[0] });
 
 		document.getElementById("providerMessage").textContent = "Storage successfully registered!";
+
+		const downloadLink = document.createElement('a');
+		downloadLink.href = '/files/test.txt';
+		downloadLink.download = 'test.txt';    // Ensure the filename is correct
+		document.body.appendChild(downloadLink);
+		downloadLink.click();
+		document.body.removeChild(downloadLink);
 	} catch (error) {
 		console.error("Error registering storage:", error);
 		document.getElementById("providerMessage").textContent = "Failed to register storage. Please try again.";

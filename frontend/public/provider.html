@@ -32,6 +32,7 @@
                 </li>
                 <li><a href="index.html">home</a></li>
                 <li><a href="consumer.html">store a file</a></li>
+                <li><a href="consumerDownload.html">Download File</a></li>
                 <li><a href="provider.html">register as provider</a></li>
                 <li><a href="how-it-works.html">how it works</a></li>
                 <li><a href="storages.html">storages</a></li>
@@ -59,37 +60,6 @@
     </div>
 
     <script src="blockchain.js" defer></script>
-    <script>
-        document.getElementById('providerForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            // Get form values
-            const availableSpace = document.getElementById('availableSpace').value;
-            const pricePerMB = document.getElementById('pricePerMB').value;
-            const socket = document.getElementById('socket').value;  // Get the socket value
-
-            try {
-                // Register the provider in the blockchain
-                await storageSharing.methods.registerStorage(availableSpace, pricePerMB, socket).send({
-                    from: ethereum.selectedAddress
-                });
-
-                document.getElementById('providerMessage').innerText = 'Registration successful. Starting download...';
-
-                // Trigger download of the binary .exe file
-                const downloadLink = document.createElement('a');
-                downloadLink.href = '/files/test.txt';
-                downloadLink.download = 'test.txt';    // Ensure the filename is correct
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-
-            } catch (error) {
-                console.error('Error registering provider:', error);
-                document.getElementById('providerMessage').innerText = 'Error during registration. Please try again.';
-            }
-        });
-    </script>
 </body>
 
 </html>

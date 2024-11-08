@@ -20,7 +20,15 @@ app.get('/how-it-works.html', (req, res) => {
 });
 
 app.get('/provider.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'publci', 'provider.html'))
+    res.sendFile(path.join(__dirname, 'public', 'provider.html'))
+})
+
+app.get('/consumer.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'consumer.html'))
+})
+
+app.get('/consumerDownload.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'consumerDownload.html'))
 })
 
 app.get('/contact.html', (req, res) => {
